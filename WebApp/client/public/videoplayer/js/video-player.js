@@ -32,16 +32,15 @@ export class VideoPlayer {
     }, true);
 
     // secondly video
-    this.localStream2 = new MediaStream();
-    this.videoThumb = elements[1];
-    this.videoThumb.playsInline = true;
-    this.videoThumb.addEventListener('loadedmetadata', function () {
-      _this.videoThumb.play();
-    }, true);
+    // this.localStream2 = new MediaStream();
+    // this.videoThumb = elements[1];
+    // this.videoThumb.playsInline = true;
+    // this.videoThumb.addEventListener('loadedmetadata', function () {
+    //   _this.videoThumb.play();
+    // }, true);
 
     this.videoTrackList = [];
-    this.videoTrackIndex = 0;
-    this.maxVideoTrackLength = 2;
+    this.videoTrackIndex = Number.MAX_VALUE;
 
     this.ondisconnect = function () { };
   }
@@ -76,9 +75,7 @@ export class VideoPlayer {
       if (data.track.kind == 'audio') {
         _this.localStream.addTrack(data.track);
       }
-      if (_this.videoTrackList.length == _this.maxVideoTrackLength) {
-        _this.switchVideo(_this.videoTrackIndex);
-      }
+      _this.switchVideo(_this.videoTrackIndex);
     });
     this.pc.addEventListener('sendoffer', (e) => {
       const offer = e.detail;
@@ -114,6 +111,7 @@ export class VideoPlayer {
         data = msg.data;
       }
       const bytes = new Uint8Array(data);
+      console.log(bytes);
       _this.videoTrackIndex = bytes[1];
       switch (bytes[0]) {
         case UnityEventType.SWITCH_VIDEO:
@@ -169,16 +167,18 @@ export class VideoPlayer {
   // switch streaming destination main video and secondly video
   switchVideo(indexVideoTrack) {
     this.video.srcObject = this.localStream;
-    this.videoThumb.srcObject = this.localStream2;
-
-    if (indexVideoTrack == 0) {
-      this.replaceTrack(this.localStream, this.videoTrackList[0]);
-      this.replaceTrack(this.localStream2, this.videoTrackList[1]);
+    // this.videoThumb.srcObject = this.localStream2;
+    if(this.videoTrackList.length > indexVideoTrack){
+      this.replaceTrack(this.localStream, this.videoTrackList[indexVideoTrack]);
     }
-    else {
-      this.replaceTrack(this.localStream, this.videoTrackList[1]);
-      this.replaceTrack(this.localStream2, this.videoTrackList[0]);
-    }
+    // if (indexVideoTrack == 0) {
+    //   this.replaceTrack(this.localStream, this.videoTrackList[0]);
+    //   this.replaceTrack(this.localStream2, this.videoTrackList[1]);
+    // }
+    // else {
+    //   this.replaceTrack(this.localStream, this.videoTrackList[1]);
+    //   this.replaceTrack(this.localStream2, this.videoTrackList[0]);
+    // }
   }
 
   // replace video track related the MediaStream
@@ -189,6 +189,7 @@ export class VideoPlayer {
         stream.removeTrack(track);
       }
     }
+    console.log(newTrack);
     stream.addTrack(newTrack);
   }
 
