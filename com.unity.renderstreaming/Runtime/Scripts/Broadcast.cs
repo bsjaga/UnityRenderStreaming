@@ -85,6 +85,8 @@ namespace Unity.RenderStreaming
             var channel = streams.OfType<IDataChannel>().
                 FirstOrDefault(r => !r.IsConnected && !r.IsLocal);
             channel?.SetChannel(data.connectionId, data.channel);
+            // Sending the client info about which video stream/channel to connect to based on which datachannel is free
+            channel.Channel.Send(new byte[] { (byte)0, (byte)streams.OfType<IDataChannel>().ToList().IndexOf(channel) });
         }
     }
 }

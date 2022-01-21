@@ -1,6 +1,7 @@
 using Unity.WebRTC;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
+using System.Threading.Tasks;
 
 namespace Unity.RenderStreaming
 {
@@ -66,8 +67,25 @@ namespace Unity.RenderStreaming
                 rt.Create();
                 m_camera.targetTexture = rt;
             }
-
+            OnStartedStream += (connectionID) => { ChangeVideoParametersAfterDelay(connectionID); };
             return new VideoStreamTrack(rt);
+        }
+        // Task to change video parameters after delay (to increase the max bitrate)
+        async Task ChangeVideoParametersAfterDelay(string connectionID)
+        {
+            while (true)
+            {
+                if (Senders.TryGetValue(connectionID, out var sender))
+                {
+                    RTCRtpSendParameters parameters = sender.GetParameters();
+                    if (parameters.encodings.Length > 0)
+                    {
+                        break;
+                    }
+                }
+                await Task.Delay(50);
+            }
+            this.ChangeVideoParameters(connectionID, 1000 * 1024 * 1024, 30);
         }
     }
 }

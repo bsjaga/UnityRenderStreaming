@@ -20,7 +20,7 @@ namespace Unity.RenderStreaming
             set
             {
                 audioSource = value;
-                _sampleRate = audioSource.clip.samples;
+                // _sampleRate = audioSource.clip.samples;
             }
             get
             {
@@ -32,7 +32,8 @@ namespace Unity.RenderStreaming
         {
             if(audioSource != null && audioSource.clip != null)
             {
-                _sampleRate = audioSource.clip.samples;
+                // _sampleRate = audioSource.clip.samples;
+                _sampleRate = AudioSettings.outputSampleRate;
             }
             else
             {
