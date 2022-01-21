@@ -357,3 +357,9 @@ Assets/Samples/
 WebApp/**/coverage/*
 
 .DS_Store
+WebApp/webserver.exe
+WebApp/client-1.local.crt
+WebApp/client-1.local.csr
+WebApp/client-1.local.key
+WebApp/rootSSL.key
+WebApp/rootSSL.pem

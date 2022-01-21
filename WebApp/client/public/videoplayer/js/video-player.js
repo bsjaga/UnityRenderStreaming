@@ -2,10 +2,9 @@ import { Signaling, WebSocketSignaling } from "../../js/signaling.js";
 import Peer from "../../js/peer.js";
 import * as Logger from "../../js/logger.js";
 
-
 // enum type of event sending from Unity
 var UnityEventType = {
-  SWITCH_VIDEO: 0
+  SWITCH_VIDEO: 0,
 };
 
 function uuid4() {
@@ -26,10 +25,14 @@ export class VideoPlayer {
     this.localStream = new MediaStream();
     this.video = elements[0];
     this.video.playsInline = true;
-    this.video.addEventListener('loadedmetadata', function () {
-      _this.video.play();
-      _this.resizeVideo();
-    }, true);
+    this.video.addEventListener(
+      "loadedmetadata",
+      function () {
+        _this.video.play();
+        _this.resizeVideo();
+      },
+      true
+    );
 
     // secondly video
     // this.localStream2 = new MediaStream();
@@ -42,14 +45,14 @@ export class VideoPlayer {
     this.videoTrackList = [];
     this.videoTrackIndex = Number.MAX_VALUE;
 
-    this.ondisconnect = function () { };
+    this.ondisconnect = function () {};
   }
 
   async setupConnection(useWebSocket) {
     const _this = this;
     // close current RTCPeerConnection
     if (this.pc) {
-      Logger.log('Close current PeerConnection');
+      Logger.log("Close current PeerConnection");
       this.pc.close();
       this.pc = null;
     }
@@ -64,48 +67,58 @@ export class VideoPlayer {
 
     // Create peerConnection with proxy server and set up handlers
     this.pc = new Peer(this.connectionId, true);
-    this.pc.addEventListener('disconnect', () => {
+    this.pc.addEventListener("disconnect", () => {
       _this.ondisconnect();
     });
-    this.pc.addEventListener('trackevent', (e) => {
+    this.pc.addEventListener("trackevent", (e) => {
       const data = e.detail;
-      if (data.track.kind == 'video') {
+      if (data.track.kind == "video") {
         _this.videoTrackList.push(data.track);
       }
-      if (data.track.kind == 'audio') {
+      if (data.track.kind == "audio") {
+        console.log("Audio: ", data.track);
         _this.localStream.addTrack(data.track);
       }
       _this.switchVideo(_this.videoTrackIndex);
     });
-    this.pc.addEventListener('sendoffer', (e) => {
+    this.pc.addEventListener("sendoffer", (e) => {
       const offer = e.detail;
       _this.signaling.sendOffer(offer.connectionId, offer.sdp);
     });
-    this.pc.addEventListener('sendanswer', (e) => {
+    this.pc.addEventListener("sendanswer", (e) => {
       const answer = e.detail;
       _this.signaling.sendAnswer(answer.connectionId, answer.sdp);
     });
-    this.pc.addEventListener('sendcandidate', (e) => {
+    this.pc.addEventListener("sendcandidate", (e) => {
       const candidate = e.detail;
-      _this.signaling.sendCandidate(candidate.connectionId, candidate.candidate, candidate.sdpMid, candidate.sdpMLineIndex);
+      _this.signaling.sendCandidate(
+        candidate.connectionId,
+        candidate.candidate,
+        candidate.sdpMid,
+        candidate.sdpMLineIndex
+      );
     });
 
     // Create data channel with proxy server and set up handlers
-    this.channel = this.pc.createDataChannel(this.connectionId, 'data');
+    this.channel = this.pc.createDataChannel(this.connectionId, "data");
     this.channel.onopen = function () {
-      Logger.log('Datachannel connected.');
+      Logger.log("Datachannel connected.");
     };
     this.channel.onerror = function (e) {
-      Logger.log("The error " + e.error.message + " occurred\n while handling data with proxy server.");
+      Logger.log(
+        "The error " +
+          e.error.message +
+          " occurred\n while handling data with proxy server."
+      );
     };
     this.channel.onclose = function () {
-      Logger.log('Datachannel disconnected.');
+      Logger.log("Datachannel disconnected.");
     };
     this.channel.onmessage = async (msg) => {
       // receive message from unity and operate message
       let data;
       // receive message data type is blob only on Firefox
-      if (navigator.userAgent.indexOf('Firefox') != -1) {
+      if (navigator.userAgent.indexOf("Firefox") != -1) {
         data = await msg.data.arrayBuffer();
       } else {
         data = msg.data;
@@ -120,29 +133,36 @@ export class VideoPlayer {
       }
     };
 
-    this.signaling.addEventListener('disconnect', async (e) => {
+    this.signaling.addEventListener("disconnect", async (e) => {
       const data = e.detail;
       if (_this.pc != null && _this.pc.connectionId == data.connectionId) {
         _this.ondisconnect();
       }
     });
-    this.signaling.addEventListener('offer', async (e) => {
+    this.signaling.addEventListener("offer", async (e) => {
       const offer = e.detail;
       const desc = new RTCSessionDescription({ sdp: offer.sdp, type: "offer" });
       if (_this.pc != null) {
         await _this.pc.onGotDescription(offer.connectionId, desc);
       }
     });
-    this.signaling.addEventListener('answer', async (e) => {
+    this.signaling.addEventListener("answer", async (e) => {
       const answer = e.detail;
-      const desc = new RTCSessionDescription({ sdp: answer.sdp, type: "answer" });
+      const desc = new RTCSessionDescription({
+        sdp: answer.sdp,
+        type: "answer",
+      });
       if (_this.pc != null) {
         await _this.pc.onGotDescription(answer.connectionId, desc);
       }
     });
-    this.signaling.addEventListener('candidate', async (e) => {
+    this.signaling.addEventListener("candidate", async (e) => {
       const candidate = e.detail;
-      const iceCandidate = new RTCIceCandidate({ candidate: candidate.candidate, sdpMid: candidate.sdpMid, sdpMLineIndex: candidate.sdpMLineIndex });
+      const iceCandidate = new RTCIceCandidate({
+        candidate: candidate.candidate,
+        sdpMid: candidate.sdpMid,
+        sdpMLineIndex: candidate.sdpMLineIndex,
+      });
       if (_this.pc != null) {
         await _this.pc.onGotCandidate(candidate.connectionId, iceCandidate);
       }
@@ -157,9 +177,18 @@ export class VideoPlayer {
     const videoRatio = this.videoWidth / this.videoHeight;
     const clientRatio = clientRect.width / clientRect.height;
 
-    this._videoScale = videoRatio > clientRatio ? clientRect.width / this.videoWidth : clientRect.height / this.videoHeight;
-    const videoOffsetX = videoRatio > clientRatio ? 0 : (clientRect.width - this.videoWidth * this._videoScale) * 0.5;
-    const videoOffsetY = videoRatio > clientRatio ? (clientRect.height - this.videoHeight * this._videoScale) * 0.5 : 0;
+    this._videoScale =
+      videoRatio > clientRatio
+        ? clientRect.width / this.videoWidth
+        : clientRect.height / this.videoHeight;
+    const videoOffsetX =
+      videoRatio > clientRatio
+        ? 0
+        : (clientRect.width - this.videoWidth * this._videoScale) * 0.5;
+    const videoOffsetY =
+      videoRatio > clientRatio
+        ? (clientRect.height - this.videoHeight * this._videoScale) * 0.5
+        : 0;
     this._videoOriginX = clientRect.left + videoOffsetX;
     this._videoOriginY = clientRect.top + videoOffsetY;
   }
@@ -168,7 +197,7 @@ export class VideoPlayer {
   switchVideo(indexVideoTrack) {
     this.video.srcObject = this.localStream;
     // this.videoThumb.srcObject = this.localStream2;
-    if(this.videoTrackList.length > indexVideoTrack){
+    if (this.videoTrackList.length > indexVideoTrack) {
       this.replaceTrack(this.localStream, this.videoTrackList[indexVideoTrack]);
     }
     // if (indexVideoTrack == 0) {
@@ -185,11 +214,10 @@ export class VideoPlayer {
   replaceTrack(stream, newTrack) {
     const tracks = stream.getVideoTracks();
     for (const track of tracks) {
-      if (track.kind == 'video') {
+      if (track.kind == "video") {
         stream.removeTrack(track);
       }
     }
-    console.log(newTrack);
     stream.addTrack(newTrack);
   }
 
@@ -218,17 +246,17 @@ export class VideoPlayer {
       return;
     }
     switch (this.channel.readyState) {
-      case 'connecting':
-        Logger.log('Connection not ready');
+      case "connecting":
+        Logger.log("Connection not ready");
         break;
-      case 'open':
+      case "open":
         this.channel.send(msg);
         break;
-      case 'closing':
-        Logger.log('Attempt to sendMsg message while closing');
+      case "closing":
+        Logger.log("Attempt to sendMsg message while closing");
         break;
-      case 'closed':
-        Logger.log('Attempt to sendMsg message while connection closed.');
+      case "closed":
+        Logger.log("Attempt to sendMsg message while connection closed.");
         break;
     }
   }
