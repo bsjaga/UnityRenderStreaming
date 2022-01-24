@@ -100,7 +100,10 @@ export class VideoPlayer {
     });
 
     // Create data channel with proxy server and set up handlers
-    this.channel = this.pc.createDataChannel(this.connectionId, "data");
+    this.channel = this.pc.createDataChannel(
+      this.connectionId,
+      "data_" + this.connectionId
+    );
     this.channel.onopen = function () {
       Logger.log("Datachannel connected.");
     };
