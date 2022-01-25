@@ -1,0 +1,15 @@
+version: 0.0
+os: linux
+files:
+  - source: .
+    destination: /home/ubuntu/RenderStreaming
+
+hooks:
+  BeforeInstall:
+    - location: scripts/before-install
+      timeout: 300
+      runas: root
+  ApplicationStart:
+    - location: scripts/start-server
+      timeout: 300
+      runas: root

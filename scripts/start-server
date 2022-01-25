@@ -1,0 +1,9 @@
+#!/bin/bash
+
+cd /home/ubuntu/RenderStreaming/WebApp
+
+npm install
+
+npm run build
+
+npm run start -w -p 80
