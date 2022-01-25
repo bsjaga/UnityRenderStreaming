@@ -1,5 +1,8 @@
 #!/bin/bash
 
+
+lsof -t -i:80 | xargs -I{} kill -9 {}
+
 cd /home/ubuntu/RenderStreaming/WebApp
 
 npm install
