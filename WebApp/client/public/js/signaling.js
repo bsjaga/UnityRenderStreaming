@@ -22,7 +22,7 @@ export class Signaling extends EventTarget {
   }
 
   url(method) {
-    return location.origin +  location.origin === "https://api.adloid.in" ? '/renderstreaming' : '' + '/signaling/' + method;
+    return location.origin +  (location.origin === "https://api.adloid.in" ? '/renderstreaming' : '') + '/signaling/' + method;
   }
 
   async start() {
@@ -193,9 +193,9 @@ export class WebSocketSignaling extends EventTarget {
 
     let websocketUrl;
     if (location.protocol === "https:") {
-      websocketUrl = "wss://" + location.host + location.host === "api.adloid.in" ? '/renderstreaming' : '';
+      websocketUrl = "wss://" + location.host + (location.host === "api.adloid.in" ? '/renderstreaming' : '');
     } else {
-      websocketUrl = "ws://" + location.host + location.host === "api.adloid.in" ? '/renderstreaming' : '';
+      websocketUrl = "ws://" + location.host + (location.host === "api.adloid.in" ? '/renderstreaming' : '');
     }
 
     this.websocket = new WebSocket(websocketUrl);

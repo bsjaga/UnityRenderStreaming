@@ -1,5 +1,5 @@
 export async function getServerConfig() {
-  const protocolEndPoint = location.origin +  location.origin === "https://api.adloid.in" ? '/renderstreaming' : '' + '/config';
+  const protocolEndPoint = location.origin +  (location.origin === "https://api.adloid.in" ? '/renderstreaming' : '') + '/config';
   const createResponse = await fetch(protocolEndPoint);
   return await createResponse.json();
 }
