@@ -1,5 +1,5 @@
 export async function getServerConfig() {
-  const protocolEndPoint = /*location.origin + */'../config';
+  const protocolEndPoint = location.origin + '/renderstreaming/config';
   const createResponse = await fetch(protocolEndPoint);
   return await createResponse.json();
 }

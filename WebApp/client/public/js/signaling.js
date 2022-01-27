@@ -22,7 +22,7 @@ export class Signaling extends EventTarget {
   }
 
   url(method) {
-    return /*location.origin + */'../signaling/' + method;
+    return location.origin + '/renderstreaming/signaling/' + method;
   }
 
   async start() {
@@ -193,9 +193,9 @@ export class WebSocketSignaling extends EventTarget {
 
     let websocketUrl;
     if (location.protocol === "https:") {
-      websocketUrl = "wss://" + location.host;
+      websocketUrl = "wss://" + location.host + '/renderstreaming';
     } else {
-      websocketUrl = "ws://" + location.host;
+      websocketUrl = "ws://" + location.host + '/renderstreaming';
     }
 
     this.websocket = new WebSocket(websocketUrl);
