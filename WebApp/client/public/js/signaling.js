@@ -193,7 +193,7 @@ export class WebSocketSignaling extends EventTarget {
 
     let websocketUrl;
     if (location.protocol === "https:") {
-      websocketUrl = "wss://" + location.host + (location.host === "api.adloid.in" ? '/renderstreaming' : '');
+      websocketUrl = "ws://" + location.host + (location.host === "api.adloid.in" ? '/renderstreaming' : '');
     } else {
       websocketUrl = "ws://" + location.host + (location.host === "api.adloid.in" ? '/renderstreaming' : '');
     }
