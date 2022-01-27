@@ -22,7 +22,7 @@ export class Signaling extends EventTarget {
   }
 
   url(method) {
-    return location.origin + '/signaling/' + method;
+    return /*location.origin + */'../signaling/' + method;
   }
 
   async start() {
